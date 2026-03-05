@@ -26,8 +26,8 @@ Final performance:
 * Test accuracy: ~93.39%
 
 ## Training Curves
-![plots/accvsepoch.png](Accuracy vs. Epoch)
-![plots/lossvsepoch.png](Loss vs. Epoch)
+![Accuracy vs. Epoch](plots/accvsepoch.png)
+![Loss vs. Epoch](plots/lossvsepoch.png)
 
 ## Project Goals
 This project was built to gain a deeper understanding of:
