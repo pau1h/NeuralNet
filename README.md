@@ -20,6 +20,52 @@ The model is trained on the MNIST handwritten digit dataset, which contains:
 
 I stuck to a two-layer fully connected neural network: Input (784) -> Linear Layer (784 -> 256) -> ReLU Activtion -> Linear Layer (256 -> 10) -> Softmax for classification.
 
+## Mathematical Formulation
+
+The network is trained using softmax cross-entropy loss applied to the logits produced by the final linear layer.
+
+The softmax function converts logits into probabilities:
+
+$$
+p_j = \frac{e^{z_j}}{\sum_k e^{z_k}}
+$$
+
+The cross-entropy loss for a single example is:
+
+$$
+L = -z_{y} + \log \sum_{j} e^{z_j}
+$$
+
+I used a numerically stable logsumexp() implementation to prevent overflow when exponentiating the logits by subtracting the maximum logit before exponentiation and adding it back afterward.
+
+Combining softmax with cross-entropy yields the gradient:
+
+$$
+\frac{\partial L}{\partial z} = p - y
+$$
+
+where $p$ represents the predicted probability distribution and $y$ is the one-hot label.
+
+For a linear layer
+
+$$
+Z = XW
+$$
+
+the gradient with respect to the weights is
+
+$$
+dW = X^T dZ
+$$
+
+The derivative of the ReLU activation is
+
+$$
+dZ = dH \cdot \mathbf{1}[Z > 0]
+$$
+
+where $\mathbf{1}[Z > 0]$ is an indicator function equal to 1 when the pre-activation is positive and 0 otherwise.
+
 ## Results
 Final performance:
 * Training accuracy: ~93.09%
