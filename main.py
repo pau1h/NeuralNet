@@ -33,7 +33,7 @@ def cross_entropy_loss(logits, y_true):
     return -logits[np.arange(len(y_true)), y_true] + logsumexp[:, 0] #selecting from logits where each row and column is the index of y_true, and y_true itself. returns the loss which is the actual logit of the correct class - the logsumexp from the rows logits. 
 
 
-def start_training(learning_rate, epochs, x_train, y_train):
+def start_training(learning_rate, epochs, w1, w2):
     for epoch in range(epochs):
         #we need to calculate the result of the hidden layer, h is supposed to be x . w1. x = 60000 x 784, w = 784 x 50, so h should be 60000 x 50
         z = relu(x_train@w1)
@@ -53,15 +53,14 @@ def start_training(learning_rate, epochs, x_train, y_train):
         dz = dh * (z>0) #propagating through relu
         dw1 = x_train.T@dz
         #update weights
-        w2 -= learning_rate*w2
-        w1 -= learning_rate*w1 
+        w1 -= learning_rate*dw1 
+        w2 -= learning_rate*dw2
+    return w1, w2
 
 
 def main():
-    
-
-
-    start_training(1e-4, 5, x_train, y_train)
+    global w1,w2
+    w1, w2 = start_training(1e-9, 30, w1, w2)
 
 
 if __name__ == "__main__":
