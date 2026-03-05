@@ -36,7 +36,14 @@ def cross_entropy_loss(logits, y_true):
 for epoch in range(epochs):
     #we need to calculate the result of the hidden layer, h is supposed to be x . w1. x = 60000 x 784, w = 784 x 50, so h should be 60000 x 50
     h = relu(x_train@w1) 
-    print(h.shape)
-    logits = h@w2 #y_pred is now 60000 x 10. We dont apply relu here because we want the logits for softmax
-    loss = cross_entropy_loss(logits, y_train)
+    logits = h@w2 #60000 x 10. We dont apply relu here because we want the logits for softmax
+    L = cross_entropy_loss(logits, y_train)
+    #now we need to calculate dloss / dlogits. this is 1/N * (softmax probabilities - y_onehot)
+    probs = softmax(logits)
+    y_onehot = np.zeros_like(logits)
+    y_onehot[np.arange(N), y_train] = 1 #1 for correct label, 0 for everything else
+    dlogits = ((1/N) * probs - y_onehot)
+    print(dlogits.shape)
+    print(dlogits[0])
+
 
