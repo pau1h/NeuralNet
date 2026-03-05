@@ -10,9 +10,11 @@ train_data = pd.read_csv('mnist_train.csv')
 test_data = pd.read_csv('mnist_test.csv')
 train = train_data.to_numpy() #785 total, idx 0 is the label, so 784 is the actual length
 test = test_data.to_numpy()
-x_train = train[:, 1:] #selecting all rows and all columns except for the first one n x d
+x_train = train[:, 1:]/255 #selecting all rows and all columns except for the first one n x d
 y_train = train[:, 0] #n x 1
-in_dim, H, out_dim, N = len(train[0]) - 1, 50, 10, len(train)
+x_test = test[:,1:]/255
+y_test = test[:,0]
+in_dim, H, out_dim, N = len(train[0]) - 1, 256, 10, len(train)
 w1 = np.random.randn(in_dim, H) * np.sqrt(2/in_dim) #w1 connecting all input vectors to all hidden layers. so this is 784 x 50. w1 = array of weights where w1[0][0] is the weight from the first input to the first hidden layer node
 w2 = np.random.randn(H, out_dim) * np.sqrt(2/H) #using kaiming initialization
 
@@ -36,18 +38,18 @@ def cross_entropy_loss(logits, y_true):
 def start_training(learning_rate, epochs, w1, w2):
     for epoch in range(epochs):
         #we need to calculate the result of the hidden layer, h is supposed to be x . w1. x = 60000 x 784, w = 784 x 50, so h should be 60000 x 50
-        z = relu(x_train@w1)
+        z = x_train@w1
         h = relu(z) 
         logits = h@w2 #60000 x 10. We dont apply relu here because we want the logits for softmax
         preds = np.argmax(logits, axis=1)
         train_accuracy = np.mean(y_train == preds)
-        print(f'Training accuracy: Epoch {epoch}, {train_accuracy*100}%')
         L = cross_entropy_loss(logits, y_train)
+        print(f'Training accuracy: Epoch {epoch}, {train_accuracy*100}%, Loss: {np.mean(L)}')
         #now we need to calculate dloss / dlogits. this is 1/N * (softmax probabilities - y_onehot)
         probs = softmax(logits)
         y_onehot = np.zeros_like(logits)
         y_onehot[np.arange(N), y_train] = 1 #1 for correct label, 0 for everything else
-        dlogits = ((1/N) * probs - y_onehot) #60000 x 10, w2 is 50 x 10
+        dlogits = (1/N)*(probs - y_onehot) #60000 x 10, w2 is 50 x 10
         dw2 = h.T@dlogits #50x10
         dh = dlogits@w2.T #60000 x 50
         dz = dh * (z>0) #propagating through relu
@@ -60,7 +62,14 @@ def start_training(learning_rate, epochs, w1, w2):
 
 def main():
     global w1,w2
-    w1, w2 = start_training(1e-9, 30, w1, w2)
+    w1, w2 = start_training(4e-1, 150, w1, w2)
+    z = x_test@w1
+    h = relu(z)
+    logits = h@w2
+    preds = np.argmax(logits, axis=1)
+    test_accuracy = np.mean(preds == y_test)
+    print(f"Test accuracy: {test_accuracy*100}")
+
 
 
 if __name__ == "__main__":
